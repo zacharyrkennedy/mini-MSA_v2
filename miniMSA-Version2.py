@@ -17,7 +17,16 @@ Time in MST, Mission Elapsed Time, latitude, longitude, gps heading, pm1.0, pm2.
 # Import serial and time for reading Wisen Board
 import serial
 import time
-import datatime
+import datetime
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+
+# Import the sleep function from the time module
+GPIO.setwarnings(False) # Ignore warning for now
+GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
+GPIO.setup(16, GPIO.OUT, initial=GPIO.LOW)
+
+
+
 
 # Import spidev and Ublox library for GPS
 #import spidev
@@ -33,11 +42,11 @@ ser = serial.Serial("/dev/ttyS0", baudrate = 9600) # adjust to your serial port;
 
 # Create a variable for the file name that is the time at which data begins getting collected
 #file_date = "{}-{}-{} {}:{}:{}".format(gps_day.month, gps_day.day, gps_day.year, gps_day.hour-7, gps_day.min, gps_day.sec)
-file_data = datetime.datetime.now()
+file_date = datetime.datetime.now()
 file_name = file_date
 
 # Create for the winsen data and name it according to the file_name variable
-winsen_file = open(file_name, "a+")
+winsen_file = open(str(file_name), "a+")
 
 # Close the newly created file
 winsen_file.close()
@@ -95,7 +104,7 @@ def get_data():
     winsen_data.append(NO2)
     
     # Open our preivously created file, and begin writing to it
-    winsen_file = open(file_name, 'a+')
+    winsen_file = open(str(file_name), 'a+')
     
     # Write data seperated by commas to the file
    # winsen_file.write(str(Real_time))
@@ -146,11 +155,16 @@ MT = 0
 # runs the get data function while the python script is running
 while True:
     print("Collecting Data...")
+    GPIO.output(16, GPIO.HIGH) # Turn on
+    time.sleep(1) # Sleep for 1 second
+
     
     print()
     print()
      
     get_data()
+    GPIO.output(16, GPIO.LOW) # Turn off
+    time.sleep(1) # Sleep for 1 second
     
     time.sleep(5)
     
