@@ -19,14 +19,12 @@ import serial
 import time
 import datetime
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+import os
 
 # Import the sleep function from the time module
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
 GPIO.setup(16, GPIO.OUT, initial=GPIO.LOW)
-
-
-
 
 # Import spidev and Ublox library for GPS
 #import spidev
@@ -42,17 +40,19 @@ ser = serial.Serial("/dev/ttyS0", baudrate = 9600) # adjust to your serial port;
 
 # Create a variable for the file name that is the time at which data begins getting collected
 #file_date = "{}-{}-{} {}:{}:{}".format(gps_day.month, gps_day.day, gps_day.year, gps_day.hour-7, gps_day.min, gps_day.sec)
-file_date = datetime.datetime.now()
-file_name = file_date
+#file_date = datetime.datetime.now()
+
+i=0
+while os.path.exists("file%s.txt" % i):
+    i += 1
+#file_name = file_date
 
 # Create for the winsen data and name it according to the file_name variable
-winsen_file = open(str(file_name), "a+")
+winsen_file = open("file%s.txt" % i, "w")
 
 # Close the newly created file
 winsen_file.close()
 
-# Create a list to store data
-winsen_data = []
 
 # Define a function that collects data from the GPS and Winsen board
 def get_data():
@@ -85,26 +85,9 @@ def get_data():
     O3 = (s[19]*256 + s[20])*0.01
     NO2 = (s[21]*256 + s[22])*0.01
     
-    # Append data to our winsen_data list
-    #winsen_data.append(Real_time)
-    winsen_data.append(MT)
-    #winsen_data.append(gps_latitude)
-    #winsen_data.append(gps_longitude) 
-    #winsen_data.append(gps_heading)
-    winsen_data.append(pm_1_0)
-    winsen_data.append(pm_2_5)
-    winsen_data.append(pm_10)
-    winsen_data.append(CO2)
-    winsen_data.append(VOC)
-    winsen_data.append(temp)
-    winsen_data.append(rh)
-    winsen_data.append(CH2O)
-    winsen_data.append(CO)
-    winsen_data.append(O3)
-    winsen_data.append(NO2)
-    
+ 
     # Open our preivously created file, and begin writing to it
-    winsen_file = open(str(file_name), 'a+')
+    winsen_file = open("file%s.txt" % i, "a+")
     
     # Write data seperated by commas to the file
    # winsen_file.write(str(Real_time))
